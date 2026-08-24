@@ -159,3 +159,6 @@
     border-radius:8px; background:var(--card); color:var(--ink); margin:.2rem 0 1rem}
   .readmark{color:var(--accent); font-weight:700; margin-inline-start:.35rem}
   .archive-list a.read .d{color:var(--faint)}
+
+  .reflect.summary{background:var(--surface-2); border-radius:10px; padding:.8rem 1.1rem; margin:1.2rem 0}
+  .reflect.summary .lbl{color:var(--accent)}

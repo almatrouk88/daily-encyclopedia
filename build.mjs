@@ -34,6 +34,7 @@ const THEMEJS=`document.getElementById('tt').addEventListener('click',function()
 function dayPage(e, prev, next){
   const terms=(e.terms||[]).map(t=>`<div class="t"><span class="ar">${esc(t.ar)}</span><span class="en">(${esc(t.en)})</span></div>`).join("");
   const refl=(e.reflection||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+  const summ=(e.summary||[]).map(x=>`<li>${esc(x)}</li>`).join("");
   const body=(e.body||[]).map(p=>`<p>${esc(p)}</p>`).join("\n      ");
   const src=(e.sources||[]).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)} ↗</a>`).join("");
   const prevA=prev?`<a href="day-${pad(prev)}.html">◀ السابق</a>`:`<a class="disabled">◀ السابق</a>`;
@@ -58,6 +59,7 @@ function dayPage(e, prev, next){
     <div class="idea"><span class="lbl">الفكرة الرئيسيّة</span>${esc(e.main_idea)}</div>
     <div class="matn">
       ${body}
+      ${summ?`<div class="reflect summary"><span class="lbl">⚡ أهمّ النقاط</span><ul>${summ}</ul></div>`:""}
       <div class="reflect"><span class="lbl">نقاط للتأمّل</span><ul>${refl}</ul></div>
       <div class="termbox"><span class="lbl">مصطلحات</span>${terms}</div>
       <div class="sources"><span class="lbl">المصادر</span>${src}</div>
