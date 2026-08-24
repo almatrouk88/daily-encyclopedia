@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الموسوعة · التصنيفات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="manifest" href="app.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f6b5f">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+</head>
+<body>
+<button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
+<div class="wrap">
+  <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
+    <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="marks.html">🔖 علاماتي</a></span></nav>
+  <header class="mast"><p class="k">الموسوعة</p><h1>التصنيفات</h1><p class="m">تصفّح حسب المجال</p></header>
+  <ul class="archive-list" id="list"><li>…</li></ul>
+</div>
+<script>
+var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+ var by={};(j.articles||[]).forEach(function(a){(by[a.category]=by[a.category]||[]).push(a);});
+ var ul=document.getElementById('list');ul.innerHTML='';
+ (j.categories||[]).forEach(function(c){var n=(by[c]||[]).length;var li=document.createElement('li');var a=document.createElement('a');
+   a.href='category.html?c='+encodeURIComponent(c);a.innerHTML='<span class="d">'+c+'</span><span class="t">'+arNum(n)+' مقالة</span>';
+   li.appendChild(a);ul.appendChild(li);});});
+document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});
+</script></body></html>

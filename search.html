@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الموسوعة · البحث</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="manifest" href="app.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f6b5f">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+</head>
+<body>
+<button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
+<div class="wrap">
+  <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
+    <span style="display:flex;gap:.45rem"><a href="archive.html">☰ التصنيفات</a><a href="marks.html">🔖 علاماتي</a></span></nav>
+  <header class="mast"><p class="k">الموسوعة</p><h1>البحث</h1><p class="m">ابحث بالعنوان أو التصنيف</p></header>
+  <div style="display:flex;flex-direction:column;gap:.3rem;margin:0 0 1rem">
+    <input id="q" type="search" placeholder="مثال: العسل، فلسفة، موزارت…" autocomplete="off"
+      style="font-family:var(--body);font-size:1.1rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
+  </div>
+  <p class="soft" id="count" style="color:var(--faint);font-size:.9rem"></p>
+  <ul class="archive-list" id="res"></ul>
+</div>
+<script>
+var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+var norm=function(s){return (s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ً-ْ]/g,'').toLowerCase().trim();};
+var DATA=[];fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j.articles||[];run();});
+function run(){var q=norm(document.getElementById('q').value);
+ var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0;});
+ var ul=document.getElementById('res');ul.innerHTML='';
+ document.getElementById('count').textContent=res.length?('النتائج: '+arNum(res.length)):'لا نتائج';
+ res.forEach(function(x){var li=document.createElement('li');var a=document.createElement('a');a.href=x.file;
+  a.innerHTML='<span class="d">'+x.title+'</span><span class="t">'+x.category+' · قراءة '+arNum(x.reading_min)+' دقائق</span>';
+  li.appendChild(a);ul.appendChild(li);});}
+document.getElementById('q').addEventListener('input',run);
+document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});
+</script></body></html>

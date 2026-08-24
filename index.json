@@ -1,0 +1,133 @@
+{
+  "note": "فهرس مقالات الموسوعة",
+  "categories": [
+    "علوم",
+    "شخصيات تاريخية",
+    "شعر مشروح",
+    "دول وأحداث",
+    "مهارات",
+    "اكتشافات",
+    "نظريات علمية مبسّطة",
+    "معلومات غريبة",
+    "فنون",
+    "فلسفة",
+    "لغة",
+    "كتاب في سطور",
+    "طبيعة",
+    "جسم الإنسان"
+  ],
+  "articles": [
+    {
+      "id": "e1",
+      "title": "كيف تتشكّل السحب؟",
+      "category": "علوم",
+      "reading_min": 5,
+      "day": 1,
+      "file": "days/day-001.html"
+    },
+    {
+      "id": "e2",
+      "title": "موزارت: حياته وعبقريّته وأبرز أعماله",
+      "category": "شخصيات تاريخية",
+      "reading_min": 6,
+      "day": 2,
+      "file": "days/day-002.html"
+    },
+    {
+      "id": "e3",
+      "title": "أراك عصيَّ الدمع — أبو فراس الحمداني",
+      "category": "شعر مشروح",
+      "reading_min": 6,
+      "day": 3,
+      "file": "days/day-003.html"
+    },
+    {
+      "id": "e4",
+      "title": "سنغافورة: من جزيرة فقيرة إلى دولة متقدّمة",
+      "category": "دول وأحداث",
+      "reading_min": 6,
+      "day": 4,
+      "file": "days/day-004.html"
+    },
+    {
+      "id": "e5",
+      "title": "كيف تتذكّر ما تتعلّمه: الاسترجاع النشط والتكرار المتباعد",
+      "category": "مهارات",
+      "reading_min": 6,
+      "day": 5,
+      "file": "days/day-005.html"
+    },
+    {
+      "id": "e6",
+      "title": "اكتشاف البنسلين: كيف غيّرت مصادفةٌ وجهَ الطبّ",
+      "category": "اكتشافات",
+      "reading_min": 6,
+      "day": 6,
+      "file": "days/day-006.html"
+    },
+    {
+      "id": "e7",
+      "title": "النسبية الخاصة: حين يصبح الزمن مرنًا",
+      "category": "نظريات علمية مبسّطة",
+      "reading_min": 7,
+      "day": 7,
+      "file": "days/day-007.html"
+    },
+    {
+      "id": "e8",
+      "title": "لماذا لا يفسد العسل أبدًا؟",
+      "category": "معلومات غريبة",
+      "reading_min": 5,
+      "day": 8,
+      "file": "days/day-008.html"
+    },
+    {
+      "id": "e9",
+      "title": "الليلة النجوميّة لفان غوخ: قصّتها ومعناها",
+      "category": "فنون",
+      "reading_min": 5,
+      "day": 9,
+      "file": "days/day-009.html"
+    },
+    {
+      "id": "e10",
+      "title": "معضلة العربة: سؤالٌ يهزّ أخلاقك",
+      "category": "فلسفة",
+      "reading_min": 6,
+      "day": 10,
+      "file": "days/day-010.html"
+    },
+    {
+      "id": "e11",
+      "title": "من «الجبر» إلى Algebra: رحلة كلمةٍ عربيّة غزت العالم",
+      "category": "لغة",
+      "reading_min": 5,
+      "day": 11,
+      "file": "days/day-011.html"
+    },
+    {
+      "id": "e12",
+      "title": "العادات الذرّيّة (Atomic Habits) لجيمس كلير",
+      "category": "كتاب في سطور",
+      "reading_min": 6,
+      "day": 12,
+      "file": "days/day-012.html"
+    },
+    {
+      "id": "e13",
+      "title": "الدُّبّ المائيّ: أصلب كائنٍ على الأرض",
+      "category": "طبيعة",
+      "reading_min": 5,
+      "day": 13,
+      "file": "days/day-013.html"
+    },
+    {
+      "id": "e14",
+      "title": "ماذا يحدث في جسمك أثناء النوم؟",
+      "category": "جسم الإنسان",
+      "reading_min": 6,
+      "day": 14,
+      "file": "days/day-014.html"
+    }
+  ]
+}

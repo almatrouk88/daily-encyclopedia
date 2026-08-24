@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الموسوعة اليوميّة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="manifest" href="app.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f6b5f">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+</head>
+<body>
+<button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
+<div class="wrap">
+  <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
+    <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="marks.html">🔖 علاماتي</a></span></nav>
+  <header class="mast"><p class="k">موسوعةٌ متجدّدة</p><h1>الموسوعة اليوميّة</h1>
+    <p class="m">مقالةٌ موثوقة كلّ يوم · في شتّى المجالات</p></header>
+  <div id="resume"></div>
+  <div class="sect-h">التصنيفات</div>
+  <ul class="archive-list" id="cats"><li>…</li></ul>
+  <p style="text-align:center;margin:1.6rem 0 0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+    <a id="todayLink" class="soft-link" href="#">📅 مقالة اليوم</a>
+    <button id="cloudRestore" class="soft-link" style="cursor:pointer">☁↓ استعادة موضعي</button></p>
+</div>
+<script>
+var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+(function(){var last=null;try{last=JSON.parse(localStorage.getItem('enc-last')||'null');}catch(e){}
+ var b=document.getElementById('resume');
+ if(last&&last.file){b.innerHTML='<a class="resume-btn" href="'+last.file+'?pg='+(last.page||1)+'"><span class="rt">▶ متابعة القراءة</span><span class="rs">'+(last.title?String(last.title).replace('الموسوعة · ',''):'آخر موضع')+' · صفحة '+arNum(last.page||1)+'</span></a>';}})();
+fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+ var by={};(j.articles||[]).forEach(function(a){(by[a.category]=by[a.category]||[]).push(a);});
+ var ul=document.getElementById('cats');ul.innerHTML='';
+ (j.categories||[]).forEach(function(c){var n=(by[c]||[]).length;var li=document.createElement('li');var a=document.createElement('a');
+   a.href='category.html?c='+encodeURIComponent(c);
+   a.innerHTML='<span class="d">'+c+'</span><span class="t">'+arNum(n)+' مقالة</span>';li.appendChild(a);ul.appendChild(li);});});
+fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(m){
+ var S=Date.UTC(2026,7,24),now=new Date();var t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+ var n=Math.floor((t-S)/86400000)+1;if(n<1)n=1;if(n>m.total)n=m.total;
+ document.getElementById('todayLink').href='days/day-'+String(n).padStart(3,'0')+'.html';});
+document.getElementById('cloudRestore').addEventListener('click',function(){var b=this;b.textContent='☁ جارٍ…';
+ fetch('https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_pos',{cache:'no-store'}).then(function(r){return r.json();}).then(function(p){
+  if(p&&p.file){location.href='/daily-encyclopedia/'+p.file+'?pg='+(p.page||1);}else{b.textContent='لا يوجد موضع محفوظ';}}).catch(function(){b.textContent='تعذّر الاتصال';});});
+document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});
+</script></body></html>
