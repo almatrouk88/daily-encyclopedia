@@ -162,3 +162,6 @@
 
   .reflect.summary{background:var(--surface-2); border-radius:10px; padding:.8rem 1.1rem; margin:1.2rem 0}
   .reflect.summary .lbl{color:var(--accent)}
+
+  /* منع انقسام الصناديق والعناوين بين صفحتين في وضع الكتاب */
+  h1,h2,.by,.badge,.idea,.reflect,.termbox,.sources,.card,.signoff,.notes{break-inside:avoid}

@@ -1,6 +1,6 @@
 import fs from "fs";
 const base="/Users/mac/daily-encyclopedia";
-const V="2"; // نسخة الأصول
+const V="3"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");

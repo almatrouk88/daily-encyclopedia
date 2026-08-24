@@ -123,9 +123,13 @@
   var flow=document.querySelector('.wrap'), vp=null, step=0, pages=1, cur=0;
   var PAGEKEY='enc-pg:'+file;
   function layout(){
-    // ارتفاع الصفحة بالبكسل بالضبط ← يملأ العمود للأسفل بلا فراغ
+    // ارتفاع الصفحة = أكبر مضاعف تامّ لسطرٍ كامل ≤ المساحة (فلا يُقصّ أيّ سطر مهما كبّرت الخط)
     var cs=getComputedStyle(vp);
-    var h=vp.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var avail=vp.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var p=flow.querySelector('.matn p');
+    var lh=p?parseFloat(getComputedStyle(p).lineHeight):0;
+    if(!lh||isNaN(lh)) lh=parseFloat(getComputedStyle(document.body).lineHeight)||28;
+    var h=Math.max(lh, Math.floor(avail/lh)*lh);
     flow.style.height=h+'px';
     flow.style.columnFill='auto';
     var colW=flow.clientWidth; flow.style.columnWidth=colW+'px';
