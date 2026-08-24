@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>الموسوعة اليوميّة</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 <link rel="manifest" href="app.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -18,28 +18,46 @@
     <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="marks.html">🔖 علاماتي</a></span></nav>
   <header class="mast"><p class="k">موسوعةٌ متجدّدة</p><h1>الموسوعة اليوميّة</h1>
     <p class="m">مقالةٌ موثوقة كلّ يوم · في شتّى المجالات</p></header>
+  <div id="prog"></div>
   <div id="resume"></div>
-  <div class="sect-h">التصنيفات</div>
-  <ul class="archive-list" id="cats"><li>…</li></ul>
-  <p style="text-align:center;margin:1.6rem 0 0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
-    <a id="todayLink" class="soft-link" href="#">📅 مقالة اليوم</a>
+  <a id="todayCard" class="today-card" href="#" style="display:none">
+    <span class="k">📅 مقال اليوم</span>
+    <div class="tt2" id="tdTitle"></div>
+    <div class="mt" id="tdMeta"></div>
+  </a>
+  <div class="sect-h">تصفّح التصنيفات</div>
+  <select class="catsel" id="catSel"><option value="">اختر تصنيفًا…</option></select>
+  <ul class="archive-list" id="catList"></ul>
+  <p style="text-align:center;margin:1.4rem 0 0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+    <a class="soft-link" href="archive.html">📁 الأرشيف (المقروءة)</a>
     <button id="cloudRestore" class="soft-link" style="cursor:pointer">☁↓ استعادة موضعي</button></p>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var READ=readMap();
 (function(){var last=null;try{last=JSON.parse(localStorage.getItem('enc-last')||'null');}catch(e){}
  var b=document.getElementById('resume');
  if(last&&last.file){b.innerHTML='<a class="resume-btn" href="'+last.file+'?pg='+(last.page||1)+'"><span class="rt">▶ متابعة القراءة</span><span class="rs">'+(last.title?String(last.title).replace('الموسوعة · ',''):'آخر موضع')+' · صفحة '+arNum(last.page||1)+'</span></a>';}})();
-fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
- var by={};(j.articles||[]).forEach(function(a){(by[a.category]=by[a.category]||[]).push(a);});
- var ul=document.getElementById('cats');ul.innerHTML='';
- (j.categories||[]).forEach(function(c){var n=(by[c]||[]).length;var li=document.createElement('li');var a=document.createElement('a');
-   a.href='category.html?c='+encodeURIComponent(c);
-   a.innerHTML='<span class="d">'+c+'</span><span class="t">'+arNum(n)+' مقالة</span>';li.appendChild(a);ul.appendChild(li);});});
-fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(m){
+Promise.all([fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}),fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();})]).then(function(res){
+ var j=res[0],m=res[1],arts=j.articles||[],cats=j.categories||[];
+ var readCount=arts.filter(function(a){return READ[a.id];}).length;
+ var pct=arts.length?Math.round(readCount/arts.length*100):0;
+ document.getElementById('prog').innerHTML='<div class="bar"><span style="width:'+pct+'%"></span></div><p class="pl">قرأتَ '+arNum(readCount)+' من '+arNum(arts.length)+'</p>';
  var S=Date.UTC(2026,7,24),now=new Date();var t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
  var n=Math.floor((t-S)/86400000)+1;if(n<1)n=1;if(n>m.total)n=m.total;
- document.getElementById('todayLink').href='days/day-'+String(n).padStart(3,'0')+'.html';});
+ var td=arts[n-1];
+ if(td){var c=document.getElementById('todayCard');c.href=td.file;c.style.display='';
+  document.getElementById('tdTitle').innerHTML=td.title+(READ[td.id]?'<span class="readmark">✓</span>':'');
+  document.getElementById('tdMeta').textContent=td.category+' · قراءة '+arNum(td.reading_min)+' دقائق';}
+ var sel=document.getElementById('catSel'),list=document.getElementById('catList');
+ cats.forEach(function(cc){var o=document.createElement('option');o.value=cc;o.textContent=cc;sel.appendChild(o);});
+ sel.addEventListener('change',function(){list.innerHTML='';var cv=this.value;if(!cv)return;
+  arts.filter(function(a){return a.category===cv;}).forEach(function(a){var li=document.createElement('li');var lnk=document.createElement('a');
+   lnk.href=a.file;if(READ[a.id])lnk.className='read';
+   lnk.innerHTML='<span class="d">'+a.title+(READ[a.id]?'<span class="readmark">✓</span>':'')+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
+   li.appendChild(lnk);list.appendChild(li);});});
+});
 document.getElementById('cloudRestore').addEventListener('click',function(){var b=this;b.textContent='☁ جارٍ…';
  fetch('https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_pos',{cache:'no-store'}).then(function(r){return r.json();}).then(function(p){
   if(p&&p.file){location.href='/daily-encyclopedia/'+p.file+'?pg='+(p.page||1);}else{b.textContent='لا يوجد موضع محفوظ';}}).catch(function(){b.textContent='تعذّر الاتصال';});});

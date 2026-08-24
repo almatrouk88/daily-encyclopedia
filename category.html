@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>الموسوعة · تصنيف</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="assets/style.css?v=1">
+<link rel="stylesheet" href="assets/style.css?v=2">
 <link rel="manifest" href="app.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15,19 +15,22 @@
 <button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
 <div class="wrap">
   <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
-    <span style="display:flex;gap:.45rem"><a href="archive.html">☰ التصنيفات</a><a href="search.html">🔍 بحث</a></span></nav>
+    <span style="display:flex;gap:.45rem"><a href="archive.html">📁 الأرشيف</a><a href="search.html">🔍 بحث</a></span></nav>
   <header class="mast"><p class="k">تصنيف</p><h1 id="ct">…</h1><p class="m" id="cm"></p></header>
   <ul class="archive-list" id="list"><li>…</li></ul>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var R=readMap();
 var c=decodeURIComponent(new URLSearchParams(location.search).get('c')||'');
 fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
  var arts=(j.articles||[]).filter(function(a){return a.category===c;});
  document.getElementById('ct').textContent=c;document.getElementById('cm').textContent=arNum(arts.length)+' مقالة';
  var ul=document.getElementById('list');ul.innerHTML='';
  arts.forEach(function(a){var li=document.createElement('li');var lnk=document.createElement('a');
-  lnk.href=a.file;lnk.innerHTML='<span class="d">'+a.title+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
+  lnk.href=a.file;if(R[a.id])lnk.className='read';
+  lnk.innerHTML='<span class="d">'+a.title+(R[a.id]?'<span class="readmark">✓</span>':'')+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
   li.appendChild(lnk);ul.appendChild(li);});});
 document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});
 </script></body></html>

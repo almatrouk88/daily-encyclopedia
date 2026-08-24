@@ -1,6 +1,6 @@
 import fs from "fs";
 const base="/Users/mac/daily-encyclopedia";
-const V="1"; // نسخة الأصول
+const V="2"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");
@@ -91,52 +91,74 @@ fs.writeFileSync(`${base}/index.html`, `${HEAD("الموسوعة اليوميّ�
     <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="marks.html">🔖 علاماتي</a></span></nav>
   <header class="mast"><p class="k">موسوعةٌ متجدّدة</p><h1>الموسوعة اليوميّة</h1>
     <p class="m">مقالةٌ موثوقة كلّ يوم · في شتّى المجالات</p></header>
+  <div id="prog"></div>
   <div id="resume"></div>
-  <div class="sect-h">التصنيفات</div>
-  <ul class="archive-list" id="cats"><li>…</li></ul>
-  <p style="text-align:center;margin:1.6rem 0 0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
-    <a id="todayLink" class="soft-link" href="#">📅 مقالة اليوم</a>
+  <a id="todayCard" class="today-card" href="#" style="display:none">
+    <span class="k">📅 مقال اليوم</span>
+    <div class="tt2" id="tdTitle"></div>
+    <div class="mt" id="tdMeta"></div>
+  </a>
+  <div class="sect-h">تصفّح التصنيفات</div>
+  <select class="catsel" id="catSel"><option value="">اختر تصنيفًا…</option></select>
+  <ul class="archive-list" id="catList"></ul>
+  <p style="text-align:center;margin:1.4rem 0 0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+    <a class="soft-link" href="archive.html">📁 الأرشيف (المقروءة)</a>
     <button id="cloudRestore" class="soft-link" style="cursor:pointer">☁↓ استعادة موضعي</button></p>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var READ=readMap();
 (function(){var last=null;try{last=JSON.parse(localStorage.getItem('enc-last')||'null');}catch(e){}
  var b=document.getElementById('resume');
  if(last&&last.file){b.innerHTML='<a class="resume-btn" href="'+last.file+'?pg='+(last.page||1)+'"><span class="rt">▶ متابعة القراءة</span><span class="rs">'+(last.title?String(last.title).replace('الموسوعة · ',''):'آخر موضع')+' · صفحة '+arNum(last.page||1)+'</span></a>';}})();
-fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
- var by={};(j.articles||[]).forEach(function(a){(by[a.category]=by[a.category]||[]).push(a);});
- var ul=document.getElementById('cats');ul.innerHTML='';
- (j.categories||[]).forEach(function(c){var n=(by[c]||[]).length;var li=document.createElement('li');var a=document.createElement('a');
-   a.href='category.html?c='+encodeURIComponent(c);
-   a.innerHTML='<span class="d">'+c+'</span><span class="t">'+arNum(n)+' مقالة</span>';li.appendChild(a);ul.appendChild(li);});});
-fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(m){
+Promise.all([fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}),fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();})]).then(function(res){
+ var j=res[0],m=res[1],arts=j.articles||[],cats=j.categories||[];
+ var readCount=arts.filter(function(a){return READ[a.id];}).length;
+ var pct=arts.length?Math.round(readCount/arts.length*100):0;
+ document.getElementById('prog').innerHTML='<div class="bar"><span style="width:'+pct+'%"></span></div><p class="pl">قرأتَ '+arNum(readCount)+' من '+arNum(arts.length)+'</p>';
  var S=Date.UTC(2026,7,24),now=new Date();var t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
  var n=Math.floor((t-S)/86400000)+1;if(n<1)n=1;if(n>m.total)n=m.total;
- document.getElementById('todayLink').href='days/day-'+String(n).padStart(3,'0')+'.html';});
+ var td=arts[n-1];
+ if(td){var c=document.getElementById('todayCard');c.href=td.file;c.style.display='';
+  document.getElementById('tdTitle').innerHTML=td.title+(READ[td.id]?'<span class="readmark">✓</span>':'');
+  document.getElementById('tdMeta').textContent=td.category+' · قراءة '+arNum(td.reading_min)+' دقائق';}
+ var sel=document.getElementById('catSel'),list=document.getElementById('catList');
+ cats.forEach(function(cc){var o=document.createElement('option');o.value=cc;o.textContent=cc;sel.appendChild(o);});
+ sel.addEventListener('change',function(){list.innerHTML='';var cv=this.value;if(!cv)return;
+  arts.filter(function(a){return a.category===cv;}).forEach(function(a){var li=document.createElement('li');var lnk=document.createElement('a');
+   lnk.href=a.file;if(READ[a.id])lnk.className='read';
+   lnk.innerHTML='<span class="d">'+a.title+(READ[a.id]?'<span class="readmark">✓</span>':'')+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
+   li.appendChild(lnk);list.appendChild(li);});});
+});
 document.getElementById('cloudRestore').addEventListener('click',function(){var b=this;b.textContent='☁ جارٍ…';
  fetch('https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_pos',{cache:'no-store'}).then(function(r){return r.json();}).then(function(p){
   if(p&&p.file){location.href='/daily-encyclopedia/'+p.file+'?pg='+(p.page||1);}else{b.textContent='لا يوجد موضع محفوظ';}}).catch(function(){b.textContent='تعذّر الاتصال';});});
 ${THEMEJS}
 </script></body></html>`);
 
-// ---- الأرشيف (التصنيفات) ----
-fs.writeFileSync(`${base}/archive.html`, `${HEAD("الموسوعة · التصنيفات","")}
+// ---- الأرشيف (المقروءة) ----
+fs.writeFileSync(`${base}/archive.html`, `${HEAD("الموسوعة · الأرشيف","")}
 <body>
 <button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
 <div class="wrap">
   <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
     <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="marks.html">🔖 علاماتي</a></span></nav>
-  <header class="mast"><p class="k">الموسوعة</p><h1>التصنيفات</h1><p class="m">تصفّح حسب المجال</p></header>
+  <header class="mast"><p class="k">الموسوعة</p><h1>الأرشيف</h1><p class="m">المقالات التي أنهيتها ✓</p></header>
   <ul class="archive-list" id="list"><li>…</li></ul>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var R=readMap();
+function fmt(ts){try{var d=new Date(ts);return arNum(d.getFullYear())+'-'+arNum(('0'+(d.getMonth()+1)).slice(-2))+'-'+arNum(('0'+d.getDate()).slice(-2));}catch(e){return '';}}
 fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
- var by={};(j.articles||[]).forEach(function(a){(by[a.category]=by[a.category]||[]).push(a);});
+ var arts=(j.articles||[]).filter(function(a){return R[a.id];}).sort(function(a,b){return R[b.id]-R[a.id];});
  var ul=document.getElementById('list');ul.innerHTML='';
- (j.categories||[]).forEach(function(c){var n=(by[c]||[]).length;var li=document.createElement('li');var a=document.createElement('a');
-   a.href='category.html?c='+encodeURIComponent(c);a.innerHTML='<span class="d">'+c+'</span><span class="t">'+arNum(n)+' مقالة</span>';
-   li.appendChild(a);ul.appendChild(li);});});
+ if(!arts.length){ul.innerHTML='<p style="color:var(--faint);text-align:center;margin:2rem 0">لا مقالات مقروءة بعد — أنهِ مقالةً لتظهر هنا ✓</p>';return;}
+ arts.forEach(function(a){var li=document.createElement('li');var lnk=document.createElement('a');lnk.href=a.file;
+  lnk.innerHTML='<span class="d">'+a.title+'<span class="readmark">✓</span></span><span class="t">'+a.category+' · '+fmt(R[a.id])+'</span>';
+  li.appendChild(lnk);ul.appendChild(li);});});
 ${THEMEJS}
 </script></body></html>`);
 
@@ -146,19 +168,22 @@ fs.writeFileSync(`${base}/category.html`, `${HEAD("الموسوعة · تصني�
 <button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
 <div class="wrap">
   <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
-    <span style="display:flex;gap:.45rem"><a href="archive.html">☰ التصنيفات</a><a href="search.html">🔍 بحث</a></span></nav>
+    <span style="display:flex;gap:.45rem"><a href="archive.html">📁 الأرشيف</a><a href="search.html">🔍 بحث</a></span></nav>
   <header class="mast"><p class="k">تصنيف</p><h1 id="ct">…</h1><p class="m" id="cm"></p></header>
   <ul class="archive-list" id="list"><li>…</li></ul>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var R=readMap();
 var c=decodeURIComponent(new URLSearchParams(location.search).get('c')||'');
 fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
  var arts=(j.articles||[]).filter(function(a){return a.category===c;});
  document.getElementById('ct').textContent=c;document.getElementById('cm').textContent=arNum(arts.length)+' مقالة';
  var ul=document.getElementById('list');ul.innerHTML='';
  arts.forEach(function(a){var li=document.createElement('li');var lnk=document.createElement('a');
-  lnk.href=a.file;lnk.innerHTML='<span class="d">'+a.title+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
+  lnk.href=a.file;if(R[a.id])lnk.className='read';
+  lnk.innerHTML='<span class="d">'+a.title+(R[a.id]?'<span class="readmark">✓</span>':'')+'</span><span class="t">قراءة '+arNum(a.reading_min)+' دقائق</span>';
   li.appendChild(lnk);ul.appendChild(li);});});
 ${THEMEJS}
 </script></body></html>`);
@@ -169,7 +194,7 @@ fs.writeFileSync(`${base}/search.html`, `${HEAD("الموسوعة · البحث"
 <button class="tt" id="tt" aria-label="تبديل الوضع">◐</button>
 <div class="wrap">
   <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
-    <span style="display:flex;gap:.45rem"><a href="archive.html">☰ التصنيفات</a><a href="marks.html">🔖 علاماتي</a></span></nav>
+    <span style="display:flex;gap:.45rem"><a href="archive.html">📁 الأرشيف</a><a href="marks.html">🔖 علاماتي</a></span></nav>
   <header class="mast"><p class="k">الموسوعة</p><h1>البحث</h1><p class="m">ابحث بالعنوان أو التصنيف</p></header>
   <div style="display:flex;flex-direction:column;gap:.3rem;margin:0 0 1rem">
     <input id="q" type="search" placeholder="مثال: العسل، فلسفة، موزارت…" autocomplete="off"
@@ -181,13 +206,15 @@ fs.writeFileSync(`${base}/search.html`, `${HEAD("الموسوعة · البحث"
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
 var norm=function(s){return (s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ً-ْ]/g,'').toLowerCase().trim();};
+function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
+var R=readMap();
 var DATA=[];fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j.articles||[];run();});
 function run(){var q=norm(document.getElementById('q').value);
  var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0;});
  var ul=document.getElementById('res');ul.innerHTML='';
  document.getElementById('count').textContent=res.length?('النتائج: '+arNum(res.length)):'لا نتائج';
- res.forEach(function(x){var li=document.createElement('li');var a=document.createElement('a');a.href=x.file;
-  a.innerHTML='<span class="d">'+x.title+'</span><span class="t">'+x.category+' · قراءة '+arNum(x.reading_min)+' دقائق</span>';
+ res.forEach(function(x){var li=document.createElement('li');var a=document.createElement('a');a.href=x.file;if(R[x.id])a.className='read';
+  a.innerHTML='<span class="d">'+x.title+(R[x.id]?'<span class="readmark">✓</span>':'')+'</span><span class="t">'+x.category+' · قراءة '+arNum(x.reading_min)+' دقائق</span>';
   li.appendChild(a);ul.appendChild(li);});}
 document.getElementById('q').addEventListener('input',run);
 ${THEMEJS}

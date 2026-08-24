@@ -66,6 +66,7 @@
   var old=document.getElementById('tt'); if(old) old.remove();
   var ctl=document.createElement('div'); ctl.className='ctl';
   ctl.innerHTML='<button id="c-top" aria-label="البداية">⤒</button>'
+              +'<button id="c-read" aria-label="تعليم مقروءة">○</button>'
               +'<button id="c-pg" aria-label="وضع الكتاب">▤</button>'
               +'<button id="c-bm" aria-label="علامة الصفحة">🔖</button>'
               +'<button id="c-th" aria-label="الوضع الليلي">◐</button>'
@@ -77,6 +78,20 @@
               +'<button id="c-mk" aria-label="علاماتي">✦</button>'
               +'<button id="c-ar" aria-label="الأرشيف">☰</button>';
   body.appendChild(ctl);
+
+  // ---- نظام «مقروء» ----
+  var READ_KEY='enc-read';
+  var curArt=(document.querySelector('article')||{}).id||'';
+  function readMap(){ try{return JSON.parse(localStorage.getItem(READ_KEY)||'{}');}catch(e){return {};} }
+  function isRead(id){ return !!readMap()[id]; }
+  function setRead(id,val){ if(!id) return; var m=readMap(); if(val){ if(!m[id]) m[id]=Date.now(); } else delete m[id];
+    localStorage.setItem(READ_KEY, JSON.stringify(m)); updateReadBtn(); }
+  function updateReadBtn(){ var b=document.getElementById('c-read'); if(b) b.textContent=isRead(curArt)?'✓':'○'; }
+  var cread=document.getElementById('c-read');
+  if(cread){ cread.addEventListener('click',function(){ var now=!isRead(curArt); setRead(curArt, now);
+    showHint(now?'✓ عُلّمت مقروءة':'أُزيلت علامة القراءة'); }); }
+  updateReadBtn();
+
   var SYNC='https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_pos';
   document.getElementById('c-cup').addEventListener('click',function(){
     var last=localStorage.getItem('enc-last')||JSON.stringify({file:file,page:(paged?cur+1:1),title:document.title,ts:Date.now()});
@@ -119,7 +134,8 @@
   function saveLast(page){ try{ localStorage.setItem('enc-last', JSON.stringify(
     {file:file, page:page, title:document.title, ts:Date.now()})); }catch(e){} }
   function render(){ flow.style.setProperty('--px',(cur*step)+'px');
-    ind.textContent='صفحة '+arNum(cur+1)+' / '+arNum(pages); localStorage.setItem(PAGEKEY,cur); saveLast(cur+1); }
+    ind.textContent='صفحة '+arNum(cur+1)+' / '+arNum(pages); localStorage.setItem(PAGEKEY,cur); saveLast(cur+1);
+    if(cur>=pages-1) setRead(curArt,true); }
   function setPage(p){ cur=Math.max(0,Math.min(pages-1,p)); render(); }
   function pageOf(el){ for(var p=0;p<pages;p++){ cur=p; flow.style.setProperty('--px',(p*step)+'px');
       var r=el.getBoundingClientRect(); if(r.right>0 && r.left<window.innerWidth) return p; } return 0; }
@@ -210,7 +226,8 @@
 
   // ---- تشغيل ----
   if(paged){ ind.style.display=''; enterPaged(); } else { ind.style.display='none'; handleDeepLink(); saveLast(1); }
-  var slT; window.addEventListener('scroll', function(){ if(paged) return; clearTimeout(slT); slT=setTimeout(function(){ saveLast(1); }, 500); });
+  var slT; window.addEventListener('scroll', function(){ if(paged) return; clearTimeout(slT); slT=setTimeout(function(){ saveLast(1);
+    if(window.innerHeight+window.scrollY >= document.body.scrollHeight-90) setRead(curArt,true); }, 500); });
   hint.textContent='المس منتصف الشاشة لإظهار الأدوات'; hint.classList.add('show');
   setTimeout(function(){ hint.classList.remove('show'); }, 2600);
 })();
