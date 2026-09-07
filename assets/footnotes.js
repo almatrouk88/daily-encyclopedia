@@ -119,30 +119,28 @@
     hintT=setTimeout(function(){ hint.classList.remove('show'); },1100); }
   var ind=document.createElement('div'); ind.className='pageind'; body.appendChild(ind);
 
-  // ---- محرّك وضع الكتاب ----
-  var flow=document.querySelector('.wrap'), vp=null, step=0, pages=1, cur=0;
+  // ---- محرّك وضع الكتاب (تقليب رأسيّ بتداخل سطرٍ واحد — بلا قصّ ولا فقد) ----
+  var flow=document.querySelector('.wrap'), vp=null, pageH=0, eff=1, pages=1, cur=0, lineH=30;
   var PAGEKEY='enc-pg:'+file;
+  function measureLine(){ var mx=0; ['.matn p','.bayt','.idea','.card p','.meaning p'].forEach(function(sel){
+      var el=flow.querySelector(sel); if(el){ var v=parseFloat(getComputedStyle(el).lineHeight); if(v&&v>mx) mx=v; } });
+    if(!mx) mx=parseFloat(getComputedStyle(document.body).lineHeight)||30; return Math.ceil(mx)+2; }
   function layout(){
-    // ارتفاع الصفحة = أكبر مضاعف تامّ لسطرٍ كامل ≤ المساحة (فلا يُقصّ أيّ سطر مهما كبّرت الخط)
     var cs=getComputedStyle(vp);
-    var avail=vp.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    var p=flow.querySelector('.matn p');
-    var lh=p?parseFloat(getComputedStyle(p).lineHeight):0;
-    if(!lh||isNaN(lh)) lh=parseFloat(getComputedStyle(document.body).lineHeight)||28;
-    var h=Math.max(lh, Math.floor(avail/lh)*lh);
-    flow.style.height=h+'px';
-    flow.style.columnFill='auto';
-    var colW=flow.clientWidth; flow.style.columnWidth=colW+'px';
-    step=colW+GAP; pages=Math.max(1, Math.round((flow.scrollWidth+GAP)/step));
+    pageH=vp.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    lineH=measureLine(); eff=Math.max(1, pageH - lineH);
+    var contentH=flow.scrollHeight;
+    pages=Math.max(1, Math.ceil((contentH - pageH) / eff) + 1);
+    if(cur>=pages) cur=pages-1; if(cur<0) cur=0;
   }
   function saveLast(page){ try{ localStorage.setItem('enc-last', JSON.stringify(
     {file:file, page:page, title:document.title, ts:Date.now()})); }catch(e){} }
-  function render(){ flow.style.setProperty('--px',(cur*step)+'px');
+  function render(){ flow.style.setProperty('--ty',(-(cur*eff))+'px');
     ind.textContent='صفحة '+arNum(cur+1)+' / '+arNum(pages); localStorage.setItem(PAGEKEY,cur); saveLast(cur+1);
     if(cur>=pages-1) setRead(curArt,true); }
   function setPage(p){ cur=Math.max(0,Math.min(pages-1,p)); render(); }
-  function pageOf(el){ for(var p=0;p<pages;p++){ cur=p; flow.style.setProperty('--px',(p*step)+'px');
-      var r=el.getBoundingClientRect(); if(r.right>0 && r.left<window.innerWidth) return p; } return 0; }
+  function pageOf(el){ var top=0,n=el; while(n&&n!==flow&&n!==document.body){ top+=(n.offsetTop||0); n=n.offsetParent; }
+    return Math.max(0, Math.min(pages-1, Math.floor(top/eff))); }
   function enterPaged(){
     try{ body.classList.add('paged'); vp=document.createElement('div'); vp.id='vp';
       flow.parentNode.insertBefore(vp,flow); vp.appendChild(flow); layout();
@@ -152,8 +150,7 @@
   }
   function exitPaged(){ body.classList.remove('paged');
     if(vp){ vp.parentNode.insertBefore(flow,vp); vp.remove(); vp=null; }
-    flow.style.removeProperty('--px'); flow.style.removeProperty('column-width');
-    flow.style.removeProperty('height'); flow.style.removeProperty('column-fill'); ind.style.display='none'; }
+    flow.style.removeProperty('--ty'); ind.style.display='none'; }
   function relayout(){ if(!paged) return; var c=cur; layout(); setPage(c); }
   function handleDeepLink(){
     var q=new URLSearchParams(location.search);

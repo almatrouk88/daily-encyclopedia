@@ -1,6 +1,6 @@
 import fs from "fs";
 const base="/Users/mac/daily-encyclopedia";
-const V="3"; // نسخة الأصول
+const V="4"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");
@@ -26,6 +26,7 @@ const HEAD=(title,pre)=>`<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f6b5f">
 <link rel="apple-touch-icon" href="${pre}assets/icon.svg">
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('${pre}sw.js').catch(function(){});});}</script>
 </head>`;
 
 const THEMEJS=`document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});`;
@@ -250,6 +251,19 @@ function render(){var bm=load('enc-bookmarks'),hl=load('enc-highlights');
 render();${THEMEJS}
 </script></body></html>`);
 
-console.log("✅ بُنيت", total, "مقالة + كل الصفحات");
+// ---- Service Worker للقراءة دون إنترنت ----
+const fonts=fs.readdirSync(`${base}/assets/fonts`).filter(f=>f.endsWith(".woff2")).map(f=>`assets/fonts/${f}`);
+const CORE=["./","index.html","archive.html","category.html","search.html","marks.html",
+  "manifest.json","index.json","app.webmanifest",
+  `assets/style.css?v=${V}`,`assets/footnotes.js?v=${V}`,"assets/fonts.css","assets/icon.svg",
+  ...fonts, ...entries.map(e=>e.file)];
+fs.writeFileSync(`${base}/sw.js`, `const CACHE='enc-v${V}';
+const CORE=${JSON.stringify(CORE)};
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(CORE.map(u=>c.add(u)))));});
+self.addEventListener('activate',e=>{e.waitUntil((async()=>{const ks=await caches.keys();await Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
+self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.origin!==location.origin)return;
+ e.respondWith(caches.open(CACHE).then(c=>c.match(req).then(hit=>{const net=fetch(req).then(res=>{if(res&&res.status===200)c.put(req,res.clone());return res;}).catch(()=>hit);return hit||net;})));});
+`);
+console.log("✅ بُنيت", total, "مقالة + كل الصفحات + sw.js");
 entries.forEach(e=>console.log("  اليوم",e.day,"|",e.category,"—",e.title));
 console.log("التصنيفات:", idx.categories.length);

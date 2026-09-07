@@ -100,8 +100,7 @@
   /* وضع الكتاب: صفحات حقيقية بأعمدة (بلا قصّ أسطر) */
   body.paged{overflow:hidden; height:100vh}
   #vp{position:fixed; inset:0; overflow:hidden; padding:18px 24px 20px; box-sizing:border-box; background:var(--bg); z-index:1}
-  body.paged .wrap{max-width:none; margin:0; padding:0; height:100%; column-gap:52px; column-fill:auto;
-    transform:translateX(var(--px,0px))}
+  body.paged .wrap{max-width:none; margin:0; padding:0; transform:translateY(var(--ty,0px)); will-change:transform}
   body.paged .tt{display:none}
   .pageind{position:fixed; bottom:.35rem; left:50%; transform:translateX(-50%); z-index:20;
     font-size:.82rem; color:var(--faint); background:var(--bg); padding:.05rem .7rem; border-radius:12px;
