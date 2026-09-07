@@ -1,6 +1,6 @@
 import fs from "fs";
 const base="/Users/mac/daily-encyclopedia";
-const V="4"; // نسخة الأصول
+const V="5"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");
@@ -81,7 +81,8 @@ entries.forEach((e,i)=>{
 
 // ---- index.json ----
 const idx={ note:"فهرس مقالات الموسوعة", categories:[...new Set(entries.map(e=>e.category))],
-  articles:entries.map(e=>({id:e.id,title:e.title,category:e.category,reading_min:e.reading_min||5,day:e.day,file:e.file})) };
+  articles:entries.map(e=>({id:e.id,title:e.title,category:e.category,reading_min:e.reading_min||5,day:e.day,file:e.file,
+    text:[e.main_idea,(e.body||[]).join(" "),(e.summary||[]).join(" "),(e.reflection||[]).join(" ")].join(" ")})) };
 fs.writeFileSync(`${base}/index.json`, JSON.stringify(idx,null,2));
 fs.writeFileSync(`${base}/manifest.json`, JSON.stringify({start:"2026-08-24",total},null,2));
 
@@ -213,7 +214,7 @@ function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}')
 var R=readMap();
 var DATA=[];fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j.articles||[];run();});
 function run(){var q=norm(document.getElementById('q').value);
- var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0;});
+ var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0||norm(x.text||'').indexOf(q)>=0;});
  var ul=document.getElementById('res');ul.innerHTML='';
  document.getElementById('count').textContent=res.length?('النتائج: '+arNum(res.length)):'لا نتائج';
  res.forEach(function(x){var li=document.createElement('li');var a=document.createElement('a');a.href=x.file;if(R[x.id])a.className='read';

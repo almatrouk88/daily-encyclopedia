@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>الموسوعة · البحث</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="assets/style.css?v=4">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <link rel="manifest" href="app.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -32,7 +32,7 @@ function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}')
 var R=readMap();
 var DATA=[];fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j.articles||[];run();});
 function run(){var q=norm(document.getElementById('q').value);
- var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0;});
+ var res=DATA.filter(function(x){return !q||norm(x.title).indexOf(q)>=0||norm(x.category).indexOf(q)>=0||norm(x.text||'').indexOf(q)>=0;});
  var ul=document.getElementById('res');ul.innerHTML='';
  document.getElementById('count').textContent=res.length?('النتائج: '+arNum(res.length)):'لا نتائج';
  res.forEach(function(x){var li=document.createElement('li');var a=document.createElement('a');a.href=x.file;if(R[x.id])a.className='read';

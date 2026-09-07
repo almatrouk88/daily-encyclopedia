@@ -1,15 +1,1 @@
-{
-  "name": "مجلة الرسالة — قراءة اليوم",
-  "short_name": "الرسالة",
-  "start_url": ".",
-  "scope": ".",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#111111",
-  "lang": "ar",
-  "dir": "rtl",
-  "icons": [
-    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
-  ]
-}
+{"name":"الموسوعة اليوميّة","short_name":"الموسوعة","start_url":".","scope":".","display":"standalone","orientation":"portrait","background_color":"#ffffff","theme_color":"#0f6b5f","lang":"ar","dir":"rtl","icons":[{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}

@@ -72,12 +72,33 @@
               +'<button id="c-th" aria-label="الوضع الليلي">◐</button>'
               +'<button id="c-dn" aria-label="تصغير الخط">A−</button>'
               +'<button id="c-up" aria-label="تكبير الخط">A+</button>'
+              +'<button id="c-listen" aria-label="استمع">🔊</button>'
               +'<button id="c-cup" aria-label="حفظ الموضع للسحابة">☁↑</button>'
               +'<button id="c-cdn" aria-label="استعادة الموضع من السحابة">☁↓</button>'
               +'<button id="c-sr" aria-label="بحث">🔍</button>'
               +'<button id="c-mk" aria-label="علاماتي">✦</button>'
               +'<button id="c-ar" aria-label="الأرشيف">☰</button>';
   body.appendChild(ctl);
+  // ---- استمع (قراءة صوتية) ----
+  (function(){
+    var synth=window.speechSynthesis, speaking=false;
+    var btn=document.getElementById('c-listen');
+    function gather(){ var art=document.querySelector('article'); if(!art) return '';
+      var c=art.cloneNode(true);
+      c.querySelectorAll('.sources,.termbox,.gloss,.notes,.badges,.cright,.lbl,.lblx,.num,sup.fn').forEach(function(n){n.remove();});
+      return c.textContent.replace(/\s+/g,' ').trim(); }
+    if(btn) btn.addEventListener('click',function(){
+      if(!synth){ showHint('التلاوة غير مدعومة على هذا الجهاز'); return; }
+      if(speaking){ synth.cancel(); speaking=false; btn.textContent='🔊'; return; }
+      var t=gather(); if(!t) return;
+      var u=new SpeechSynthesisUtterance(t); u.lang='ar-SA'; u.rate=0.95;
+      try{ var vs=synth.getVoices()||[]; var ar=vs.filter(function(v){return /^ar/i.test(v.lang);})[0]; if(ar) u.voice=ar; }catch(e){}
+      u.onend=function(){ speaking=false; btn.textContent='🔊'; };
+      synth.cancel(); synth.speak(u); speaking=true; btn.textContent='⏹'; showHint('▶ جارٍ التلاوة');
+    });
+    window.addEventListener('beforeunload',function(){ try{synth.cancel();}catch(e){} });
+  })();
+
 
   // ---- نظام «مقروء» ----
   var READ_KEY='enc-read';
