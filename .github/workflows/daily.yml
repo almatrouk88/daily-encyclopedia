@@ -1,0 +1,31 @@
+name: توليد الموسوعة اليومي
+on:
+  schedule:
+    - cron: "0 3 * * *"   # يوميًّا ٦ صباحًا بتوقيت الكويت (٣ص UTC)
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: daily-gen
+  cancel-in-progress: false
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install @anthropic-ai/sdk
+      - name: توليد المحتوى
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node generate.mjs
+      - name: بناء ودفع
+        run: |
+          node build.mjs
+          git config user.name "daily-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "توليد تلقائي: مقالة اليوم 📚"
+          git push
