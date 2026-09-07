@@ -73,12 +73,49 @@
               +'<button id="c-dn" aria-label="تصغير الخط">A−</button>'
               +'<button id="c-up" aria-label="تكبير الخط">A+</button>'
               +'<button id="c-listen" aria-label="استمع">🔊</button>'
+              +'<button id="c-set" aria-label="إعدادات">⚙</button>'
+              +'<button id="c-note" aria-label="ملاحظة">📝</button>'
               +'<button id="c-cup" aria-label="حفظ الموضع للسحابة">☁↑</button>'
               +'<button id="c-cdn" aria-label="استعادة الموضع من السحابة">☁↓</button>'
               +'<button id="c-sr" aria-label="بحث">🔍</button>'
               +'<button id="c-mk" aria-label="علاماتي">✦</button>'
               +'<button id="c-ar" aria-label="الأرشيف">☰</button>';
   body.appendChild(ctl);
+
+  // ---- إعدادات القراءة + ملاحظة شخصية + اقتباس ----
+  (function(){
+    var APP=FS_KEY.replace('fs','');
+    var sf=localStorage.getItem(APP+'font'); if(sf==='clear') root.style.setProperty('--body','"Geeza Pro","Segoe UI",Tahoma,sans-serif');
+    var sl=localStorage.getItem(APP+'lh'); if(sl) root.style.setProperty('--lh',sl);
+    var panel=document.createElement('div'); panel.className='sheet'; panel.style.display='none';
+    panel.innerHTML='<div class="sheet-in"><div class="sh-h">إعدادات القراءة</div>'
+      +'<div class="sh-row"><span>الخطّ</span><span><button data-f="classic">كلاسيكيّ</button> <button data-f="clear">واضح</button></span></div>'
+      +'<div class="sh-row"><span>تباعد الأسطر</span><span><button data-lh="1.55">مضغوط</button> <button data-lh="1.75">عادي</button> <button data-lh="2.05">مريح</button></span></div>'
+      +'<button class="sh-close">تمّ</button></div>';
+    body.appendChild(panel);
+    var cset=document.getElementById('c-set'); if(cset) cset.addEventListener('click',function(){ panel.style.display='flex'; });
+    panel.addEventListener('click',function(e){
+      if(e.target===panel||(e.target.className||'').indexOf('sh-close')>=0){ panel.style.display='none'; return; }
+      var b=e.target.closest('button'); if(!b) return;
+      if(b.dataset.f){ if(b.dataset.f==='clear'){ root.style.setProperty('--body','"Geeza Pro","Segoe UI",Tahoma,sans-serif'); localStorage.setItem(APP+'font','clear'); } else { root.style.removeProperty('--body'); localStorage.setItem(APP+'font','classic'); } if(typeof relayout==='function') relayout(); }
+      if(b.dataset.lh){ root.style.setProperty('--lh',b.dataset.lh); localStorage.setItem(APP+'lh',b.dataset.lh); if(typeof relayout==='function') relayout(); }
+    });
+    var NKEY=APP+'notes';
+    function notes(){ try{return JSON.parse(localStorage.getItem(NKEY)||'{}');}catch(e){return {};} }
+    var cnote=document.getElementById('c-note');
+    function upd(){ if(cnote) cnote.textContent=(notes()[file]&&notes()[file].t)?'📝•':'📝'; }
+    upd();
+    var ns=document.createElement('div'); ns.className='sheet'; ns.style.display='none';
+    ns.innerHTML='<div class="sheet-in"><div class="sh-h">ملاحظتي</div><textarea class="note-ta" placeholder="اكتب ملاحظتك على هذا الموضع…"></textarea><button class="sh-save">حفظ</button><button class="sh-close">إغلاق</button></div>';
+    body.appendChild(ns); var ta=ns.querySelector('.note-ta');
+    if(cnote) cnote.addEventListener('click',function(){ var m=notes(); ta.value=(m[file]&&m[file].t)||''; ns.style.display='flex'; setTimeout(function(){ta.focus();},50); });
+    ns.addEventListener('click',function(e){
+      if(e.target===ns||(e.target.className||'').indexOf('sh-close')>=0){ ns.style.display='none'; return; }
+      if((e.target.className||'').indexOf('sh-save')>=0){ var m=notes(); var v=ta.value.trim();
+        if(v){ m[file]={t:v,title:document.title,ts:Date.now()}; } else { delete m[file]; }
+        localStorage.setItem(NKEY,JSON.stringify(m)); ns.style.display='none'; upd(); showHint('✓ حُفظت الملاحظة'); }
+    });
+  })();
   // ---- استمع (قراءة صوتية) ----
   (function(){
     var synth=window.speechSynthesis, speaking=false;
@@ -218,7 +255,7 @@
 
   // ---- أداة التظليل عند تحديد النص ----
   var sel=document.createElement('div'); sel.className='seltool';
-  sel.innerHTML='<button data-a="hl">🖊 تظليل</button>'; body.appendChild(sel);
+  sel.innerHTML='<button data-a="hl">🖊 تظليل</button><button data-a="copy">📋 اقتباس</button>'; body.appendChild(sel);
   function hideSel(){ sel.classList.remove('show'); }
   function onSelect(){
     var s=window.getSelection(); var txt=s?String(s).trim():'';
@@ -239,6 +276,13 @@
     highlightText(art, txt);
     if(window.getSelection) window.getSelection().removeAllRanges();
     hideSel(); relayout(); showHint('✓ حُفظ التظليل');
+  });
+  var _cp=sel.querySelector('[data-a=copy]');
+  if(_cp) _cp.addEventListener('click',function(e){ e.stopPropagation();
+    var q='«'+sel.dataset.text+'»\n— '+document.title.replace(/^[^·]*·\s*/,'')+'\n'+location.href.split('?')[0];
+    if(navigator.clipboard){ navigator.clipboard.writeText(q).then(function(){showHint('✓ نُسخ الاقتباس');},function(){showHint('تعذّر النسخ');}); }
+    else showHint('النسخ غير مدعوم');
+    if(window.getSelection) window.getSelection().removeAllRanges(); hideSel();
   });
 
   window.addEventListener('resize', relayout);

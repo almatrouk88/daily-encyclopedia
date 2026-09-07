@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>الموسوعة · علاماتي</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="assets/style.css?v=5">
+<link rel="stylesheet" href="assets/style.css?v=6">
 <link rel="manifest" href="app.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -18,7 +18,7 @@
   <nav class="nav"><a class="home" href="index.html">📚 الموسوعة</a>
     <span style="display:flex;gap:.45rem"><a href="search.html">🔍 بحث</a><a href="archive.html">☰ التصنيفات</a></span></nav>
   <header class="mast"><p class="k">الموسوعة</p><h1>علاماتي</h1><p class="m">علاماتك وتظليلاتك</p></header>
-  <div id="bm"></div><div id="hl"></div>
+  <div id="bm"></div><div id="hl"></div><div id="nt"></div>
 </div>
 <script>
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
@@ -34,6 +34,12 @@ function render(){var bm=load('enc-bookmarks'),hl=load('enc-highlights');
  hs.innerHTML='<div class="sect-h">التظليلات ('+arNum(hl.length)+')</div>';
  if(!hl.length)hs.innerHTML+='<p style="color:var(--faint);text-align:center">لا تظليلات — ظلّل نصًّا أثناء القراءة.</p>';
  hl.slice().reverse().forEach(function(h){var box=document.createElement('div');box.style.margin='0 0 1rem';
-  box.innerHTML='<p style="font-size:1.05rem;line-height:1.8">«'+h.text+'»</p><div style="font-size:.85rem"><a href="'+h.file+'" style="color:var(--ink)">↩ اذهب للموضع</a></div>';hs.appendChild(box);});}
+  box.innerHTML='<p style="font-size:1.05rem;line-height:1.8">«'+h.text+'»</p><div style="font-size:.85rem"><a href="'+h.file+'" style="color:var(--ink)">↩ اذهب للموضع</a></div>';hs.appendChild(box);});
+ var nt={};try{nt=JSON.parse(localStorage.getItem('enc-notes')||'{}');}catch(e){}
+ var nk=Object.keys(nt), ne=document.getElementById('nt');
+ ne.innerHTML='<div class="sect-h">ملاحظاتي ('+arNum(nk.length)+')</div>';
+ if(!nk.length)ne.innerHTML+='<p style="color:var(--faint);text-align:center">لا ملاحظات — اكتب واحدة بزر 📝 أثناء القراءة.</p>';
+ nk.forEach(function(k){var o=nt[k]||{};var d=document.createElement('div');d.style.margin='0 0 1rem';
+  d.innerHTML='<p style="line-height:1.8">'+(o.t||'')+'</p><div style="font-size:.85rem"><a href="'+k+'" style="color:var(--ink)">↩ '+((o.title||'').replace('الموسوعة · ',''))+'</a></div>';ne.appendChild(d);});}
 render();document.getElementById('tt').addEventListener('click',function(){var r=document.documentElement,t=r.getAttribute('data-theme');var d=t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('risala-theme',d?'light':'dark');});
 </script></body></html>

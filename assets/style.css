@@ -18,7 +18,7 @@
   html{-webkit-text-size-adjust:100%; font-size:var(--fs,112%)}
   body{
     margin:0; background:var(--bg); color:var(--ink);
-    font-family:var(--body); font-size:1.3rem; line-height:1.75;
+    font-family:var(--body); font-size:1.3rem; line-height:var(--lh,1.75);
     text-rendering:optimizeLegibility;
   }
   .wrap{max-width:42rem; margin:0 auto; padding:clamp(.8rem,3vw,1.6rem) clamp(.7rem,3vw,1.2rem) 3rem}
@@ -39,10 +39,10 @@
 
   .card{background:var(--card); border:1px solid var(--cardline); padding:.9rem 1.1rem; margin:0 0 1rem}
   .card h3{margin:0 0 .3rem; font-size:.74rem; letter-spacing:.2em; font-weight:700}
-  .card p{margin:0; font-size:1.02rem; line-height:1.75; color:var(--ink)}
+  .card p{margin:0; font-size:1.02rem; line-height:var(--lh,1.75); color:var(--ink)}
 
   .matn{margin-top:1.4rem}
-  .matn p{margin:0 0 .5rem; text-align:justify; line-height:1.75}
+  .matn p{margin:0 0 .5rem; text-align:justify; line-height:var(--lh,1.75)}
   .g{font-weight:700; border-bottom:1px solid currentColor}
   sup.fn{font-weight:700; font-size:.62em; line-height:0}
   sup.fn a{text-decoration:none; color:var(--ink); padding:0 .12em}
@@ -164,3 +164,14 @@
 
   /* منع انقسام الصناديق والعناوين بين صفحتين في وضع الكتاب */
   h1,h2,.by,.badge,.idea,.reflect,.termbox,.sources,.card,.signoff,.notes{break-inside:avoid}
+
+  /* لوحات الإعدادات والملاحظة */
+  .sheet{position:fixed; inset:0; background:rgba(20,16,10,.45); z-index:60; display:flex; align-items:flex-end; justify-content:center}
+  .sheet-in{background:var(--surface); width:100%; max-width:40rem; border-radius:16px 16px 0 0; padding:1.1rem 1.2rem 1.6rem; box-shadow:0 -14px 40px -18px rgba(0,0,0,.5); max-height:80vh; overflow:auto}
+  .sh-h{font-weight:700; font-size:1.1rem; margin-bottom:.9rem; text-align:center; font-family:var(--body)}
+  .sh-row{display:flex; justify-content:space-between; align-items:center; gap:.8rem; margin:.7rem 0; flex-wrap:wrap}
+  .sh-row>span:first-child{color:var(--soft); font-weight:700}
+  .sh-row button,.sh-close,.sh-save{font-family:var(--body); border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:.45rem .85rem; cursor:pointer; font-size:.95rem}
+  .sh-close,.sh-save{width:100%; margin-top:1rem; font-weight:700; padding:.65rem}
+  .sh-save{background:var(--ink); color:var(--bg); border:0}
+  .note-ta{width:100%; min-height:8rem; font-family:var(--body); font-size:1.05rem; padding:.7rem; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); line-height:1.75; box-sizing:border-box; margin:.4rem 0}
