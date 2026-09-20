@@ -38,9 +38,10 @@
 var arNum=function(n){return String(n).replace(/[0-9]/g,function(d){return "٠١٢٣٤٥٦٧٨٩"[d]});};
 function readMap(){try{return JSON.parse(localStorage.getItem('enc-read')||'{}');}catch(e){return {};}}
 var READ=readMap();
-(function(){var last=null;try{last=JSON.parse(localStorage.getItem('enc-last')||'null');}catch(e){}
+var LAST=null; try{LAST=JSON.parse(localStorage.getItem('enc-last')||'null');}catch(e){}
+(function(){
  var b=document.getElementById('resume');
- if(last&&last.file){b.innerHTML='<a class="resume-btn" href="'+last.file+'?pg='+(last.page||1)+'"><span class="rt">▶ متابعة القراءة</span><span class="rs">'+(last.title?String(last.title).replace('الموسوعة · ',''):'آخر موضع')+' · صفحة '+arNum(last.page||1)+'</span></a>';}})();
+ if(LAST&&LAST.file){b.innerHTML='<a class="resume-btn" href="'+LAST.file+'?pg='+(LAST.page||1)+'"><span class="rt">▶ متابعة القراءة</span><span class="rs">'+(LAST.title?String(LAST.title).replace('الموسوعة · ',''):'آخر موضع')+' · صفحة '+arNum(LAST.page||1)+'</span></a>';}})();
 Promise.all([fetch('index.json',{cache:'no-store'}).then(function(r){return r.json();}),fetch('manifest.json',{cache:'no-store'}).then(function(r){return r.json();})]).then(function(res){
  var j=res[0],m=res[1],arts=j.articles||[],cats=j.categories||[];
  var readCount=arts.filter(function(a){return READ[a.id];}).length;
@@ -48,6 +49,15 @@ Promise.all([fetch('index.json',{cache:'no-store'}).then(function(r){return r.js
  document.getElementById('prog').innerHTML='<div class="bar"><span style="width:'+pct+'%"></span></div><p class="pl">قرأتَ '+arNum(readCount)+' من '+arNum(arts.length)+'</p>';
  var _nu=arts.filter(function(a){return !READ[a.id];})[0], _nb=document.getElementById('nextUnread');
  if(_nb){ if(_nu){ _nb.addEventListener('click',function(){location.href=_nu.file;}); } else { _nb.textContent='✓ أنهيتَ الكلّ'; } }
+ // إذا أنهيتَ آخر مقالة كنتَ فيها (أو لا يوجد موضع محفوظ)، اجعل «متابعة القراءة» تأخذك للتالي غير المقروء تلقائيًّا
+ (function(){
+   var box=document.getElementById('resume');
+   var lastArt=LAST&&arts.filter(function(a){return a.file===LAST.file;})[0];
+   if(!LAST || (lastArt&&READ[lastArt.id])){
+     if(_nu){ box.innerHTML='<a class="resume-btn" href="'+_nu.file+'"><span class="rt">▶ التالي غير المقروء</span><span class="rs">'+_nu.title+'</span></a>'; }
+     else if(arts.length){ box.innerHTML='<div class="resume-btn"><span class="rt">✓ أنهيتَ كلّ المقالات</span><span class="rs">أحسنت!</span></div>'; }
+   }
+ })();
  var S=Date.UTC(2026,7,24),now=new Date();var t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
  var n=Math.floor((t-S)/86400000)+1;if(n<1)n=1;if(n>m.total)n=m.total;
  var td=arts[n-1];
