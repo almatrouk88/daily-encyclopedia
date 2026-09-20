@@ -66,6 +66,7 @@
   var old=document.getElementById('tt'); if(old) old.remove();
   var ctl=document.createElement('div'); ctl.className='ctl';
   ctl.innerHTML='<button id="c-top" aria-label="البداية">⤒</button>'
+              +'<button id="c-fs" aria-label="ملء الشاشة">⛶</button>'
               +'<button id="c-read" aria-label="تعليم مقروءة">○</button>'
               +'<button id="c-pg" aria-label="وضع الكتاب">▤</button>'
               +'<button id="c-bm" aria-label="علامة الصفحة">🔖</button>'
@@ -179,6 +180,20 @@
   document.getElementById('c-ar').addEventListener('click',function(){ location.href=pre+'archive.html'; });
   document.getElementById('c-top').addEventListener('click',function(){
     if(paged) setPage(0); else window.scrollTo(0,0); showHint('⤒ البداية'); });
+  // ملء الشاشة الحقيقي عبر Fullscreen API — يخفي شريط عنوان المتصفّح فعليًّا
+  // (يعمل حتى لو فُتح الموقع كـ«اختصار» لا تطبيقًا مثبَّتًا حقيقيًّا، لأنه إخفاءٌ على مستوى المتصفّح لا الـ PWA)
+  document.getElementById('c-fs').addEventListener('click',function(){
+    var d=document.documentElement;
+    var isFs=document.fullscreenElement||document.webkitFullscreenElement;
+    if(!isFs){
+      var req=d.requestFullscreen||d.webkitRequestFullscreen||d.mozRequestFullScreen||d.msRequestFullscreen;
+      if(req){ req.call(d).catch(function(){ showHint('ملء الشاشة غير مدعوم على هذا المتصفّح'); }); }
+      else showHint('ملء الشاشة غير مدعوم على هذا المتصفّح');
+    } else {
+      var exit=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen;
+      if(exit) exit.call(document);
+    }
+  });
 
   var hint=document.createElement('div'); hint.className='taphint'; body.appendChild(hint);
   var hintT;
@@ -302,7 +317,8 @@
   window.addEventListener('resize', relayout);
   ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
     document.addEventListener(ev, function(){ var f=document.fullscreenElement||document.webkitFullscreenElement;
-      body.classList.toggle('hide-ui', !!f); setTimeout(relayout,60); }); });
+      body.classList.toggle('hide-ui', !!f); setTimeout(relayout,60);
+      var fb=document.getElementById('c-fs'); if(fb) fb.textContent=f?'⛶ خروج':'⛶'; }); });
 
   // ---- تشغيل ----
   if(paged){ ind.style.display=''; enterPaged(); } else { ind.style.display='none'; handleDeepLink(); saveLast(1); }
