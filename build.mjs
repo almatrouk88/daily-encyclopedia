@@ -1,6 +1,6 @@
 import fs from "fs";
 const base=process.cwd();
-const V="6"; // نسخة الأصول
+const V="7"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");
@@ -269,10 +269,19 @@ const CORE=["./","index.html","archive.html","category.html","search.html","mark
   ...fonts, ...entries.map(e=>e.file)];
 fs.writeFileSync(`${base}/sw.js`, `const CACHE='enc-v${V}';
 const CORE=${JSON.stringify(CORE)};
+// ملفات البيانات والصفحات: شبكة أولًا (طازجة دومًا)، تُحفظ نسخة احتياطية للعمل دون إنترنت فقط
+const NET_FIRST=/(^|\\/)(index\\.json|manifest\\.json|[^/]+\\.html)(\\?|$)/;
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(CORE.map(u=>c.add(u)))));});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{const ks=await caches.keys();await Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
-self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.origin!==location.origin)return;
- e.respondWith(caches.open(CACHE).then(c=>c.match(req).then(hit=>{const net=fetch(req).then(res=>{if(res&&res.status===200)c.put(req,res.clone());return res;}).catch(()=>hit);return hit||net;})));});
+self.addEventListener('fetch',e=>{
+  const req=e.request; if(req.method!=='GET') return;
+  const url=new URL(req.url); if(url.origin!==location.origin) return;
+  if(NET_FIRST.test(url.pathname+url.search)){
+    e.respondWith(caches.open(CACHE).then(c=>fetch(req).then(res=>{ if(res&&res.status===200) c.put(req,res.clone()); return res; }).catch(()=>c.match(req))));
+    return;
+  }
+  e.respondWith(caches.open(CACHE).then(c=>c.match(req).then(hit=>{const net=fetch(req).then(res=>{if(res&&res.status===200)c.put(req,res.clone());return res;}).catch(()=>hit);return hit||net;})));
+});
 `);
 console.log("✅ بُنيت", total, "مقالة + كل الصفحات + sw.js");
 entries.forEach(e=>console.log("  اليوم",e.day,"|",e.category,"—",e.title));

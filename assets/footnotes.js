@@ -137,18 +137,27 @@
   })();
 
 
-  // ---- نظام «مقروء» ----
+  // ---- نظام «مقروء» (محفوظ محليًّا ومرفوع للسحابة تلقائيًّا كي يظهر على أيّ جهاز) ----
   var READ_KEY='enc-read';
+  var READ_SYNC='https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_read';
   var curArt=(document.querySelector('article')||{}).id||'';
   function readMap(){ try{return JSON.parse(localStorage.getItem(READ_KEY)||'{}');}catch(e){return {};} }
   function isRead(id){ return !!readMap()[id]; }
   function setRead(id,val){ if(!id) return; var m=readMap(); if(val){ if(!m[id]) m[id]=Date.now(); } else delete m[id];
-    localStorage.setItem(READ_KEY, JSON.stringify(m)); updateReadBtn(); }
+    localStorage.setItem(READ_KEY, JSON.stringify(m)); updateReadBtn();
+    fetch(READ_SYNC,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)}).catch(function(){}); }
   function updateReadBtn(){ var b=document.getElementById('c-read'); if(b) b.textContent=isRead(curArt)?'✓':'○'; }
   var cread=document.getElementById('c-read');
   if(cread){ cread.addEventListener('click',function(){ var now=!isRead(curArt); setRead(curArt, now);
-    showHint(now?'✓ عُلّمت مقروءة':'أُزيلت علامة القراءة'); }); }
+    showHint(now?'✓ عُلّمت مقروءة (رُفعت للسحابة)':'أُزيلت علامة القراءة'); }); }
   updateReadBtn();
+  // نجلب علامات القراءة من السحابة عند فتح أيّ صفحة وندمجها محليًّا (بلا حذف — الاتحاد بين الجهازين)
+  fetch(READ_SYNC,{cache:'no-store'}).then(function(r){return r.json();}).then(function(remote){
+    if(!remote||typeof remote!=='object') return;
+    var local=readMap(), changed=false;
+    Object.keys(remote).forEach(function(id){ if(!local[id]){ local[id]=remote[id]; changed=true; } });
+    if(changed){ localStorage.setItem(READ_KEY, JSON.stringify(local)); updateReadBtn(); }
+  }).catch(function(){});
 
   var SYNC='https://kvdb.io/Hj8v3hbdFx6wBP8hrRyaUk/enc_pos';
   document.getElementById('c-cup').addEventListener('click',function(){
@@ -213,8 +222,13 @@
   function handleDeepLink(){
     var q=new URLSearchParams(location.search);
     var art=q.get('art'), pg=q.get('pg');
-    if(art){ var el=document.getElementById(art); if(el){ setPage(pageOf(el)); return; } }
+    if(art){ var el=document.getElementById(art); if(el){ if(paged){ setPage(pageOf(el)); } else { el.scrollIntoView({block:'start'}); } return; } }
     if(pg){ var n=parseInt(pg,10); if(!isNaN(n)) setPage(n-1); }
+  }
+  // الخطّ يصل عبر الشبكة؛ إن لم يكتمل تحميله قبل الحساب الأول تتغيّر أبعاد الأسطر بعد الرسم
+  // فيصبح الحساب القديم خاطئًا (تُفتح مقالة مجاورة بدل المطلوبة) — نعيد الحساب فور اكتمال الخطوط
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ if(paged) layout(); handleDeepLink(); }).catch(function(){});
   }
 
   // ---- الأزرار ----
