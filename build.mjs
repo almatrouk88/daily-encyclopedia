@@ -1,6 +1,6 @@
 import fs from "fs";
 const base=process.cwd();
-const V="7"; // نسخة الأصول
+const V="8"; // نسخة الأصول
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const arNum=n=>String(n).replace(/[0-9]/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const pad=n=>String(n).padStart(3,"0");
@@ -25,7 +25,7 @@ const HEAD=(title,pre)=>`<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f6b5f">
-<link rel="apple-touch-icon" href="${pre}assets/icon.svg">
+<link rel="apple-touch-icon" href="${pre}assets/icons/icon-192.png">
 <script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('${pre}sw.js').catch(function(){});});}</script>
 </head>`;
 
@@ -265,7 +265,7 @@ render();${THEMEJS}
 const fonts=fs.readdirSync(`${base}/assets/fonts`).filter(f=>f.endsWith(".woff2")).map(f=>`assets/fonts/${f}`);
 const CORE=["./","index.html","archive.html","category.html","search.html","marks.html",
   "manifest.json","index.json","app.webmanifest",
-  `assets/style.css?v=${V}`,`assets/footnotes.js?v=${V}`,"assets/fonts.css","assets/icon.svg",
+  `assets/style.css?v=${V}`,`assets/footnotes.js?v=${V}`,"assets/fonts.css","assets/icon.svg","assets/icons/icon-192.png","assets/icons/icon-512.png",
   ...fonts, ...entries.map(e=>e.file)];
 fs.writeFileSync(`${base}/sw.js`, `const CACHE='enc-v${V}';
 const CORE=${JSON.stringify(CORE)};
