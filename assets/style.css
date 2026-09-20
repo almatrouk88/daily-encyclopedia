@@ -89,7 +89,6 @@
   @media print{.ctl,.tt{display:none}}
 
   /* وضع القراءة: إخفاء الواجهة عند ملء الشاشة أو الطيّ اليدويّ */
-  :fullscreen .ctl, :fullscreen .nav, :-webkit-full-screen .ctl, :-webkit-full-screen .nav{display:none !important}
   body.hide-ui .ctl, body.hide-ui .nav{display:none !important}
   /* تلميح مناطق اللمس (يظهر لحظة عند الوسط) */
   .taphint{position:fixed; left:50%; bottom:1.2rem; transform:translateX(-50%); z-index:35;
